@@ -15,6 +15,8 @@ var config = {
 };
 firebase.initializeApp(config);
 
+console.log(__dirname);
+
 
 // Update DATA
 // var playersRef = firebase.database().ref("players/");
