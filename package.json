@@ -1,0 +1,14 @@
+{
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "firebase": "^5.8.0",
+    "firebase-admin": "^6.5.0",
+    "password-hash": "^1.2.2"
+  }
+}
