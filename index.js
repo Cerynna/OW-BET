@@ -46,7 +46,7 @@ console.log(__dirname);
 const app = express();
 
 // Serve the static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static('client/build'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({
     extended: true
