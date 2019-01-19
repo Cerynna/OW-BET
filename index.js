@@ -44,7 +44,7 @@ firebase.initializeApp(config);
 const app = express();
 
 // Serve the static files from the React app
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({
     extended: true
@@ -164,7 +164,7 @@ app.post('/api/signIn', (req, res) => {
     
     // Handles any requests that don't match the ones above
     app.get('*', (req, res) => {
-        const index = path.join(__dirname + '/build/index.html');
+        const index = path.join(__dirname + '/client/build/index.html');
         res.sendFile(path.join(index));
     });
     
