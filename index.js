@@ -15,8 +15,6 @@ var config = {
 };
 firebase.initializeApp(config);
 
-console.log(__dirname)
-
 
 // Update DATA
 // var playersRef = firebase.database().ref("players/");
@@ -166,9 +164,8 @@ app.post('/api/signIn', (req, res) => {
     
     // Handles any requests that don't match the ones above
     app.get('*', (req, res) => {
-        const index = path.join('/client','build/index.html')
-        console.log(index);
-        res.sendFile(index);
+        const index = path.join(__dirname + '/client/build/index.html');
+        res.sendFile(path.join(index));
     });
     
     const port = process.env.PORT || 5000;
