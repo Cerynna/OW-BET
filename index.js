@@ -15,7 +15,7 @@ var config = {
 };
 firebase.initializeApp(config);
 
-console.log(__dirname);
+console.log(__dirname)
 
 
 // Update DATA
@@ -46,7 +46,7 @@ console.log(__dirname);
 const app = express();
 
 // Serve the static files from the React app
-app.use(express.static('client/build'));
+app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({
     extended: true
@@ -166,7 +166,7 @@ app.post('/api/signIn', (req, res) => {
     
     // Handles any requests that don't match the ones above
     app.get('*', (req, res) => {
-        res.sendFile('./client/build/index.html');
+        res.sendFile(path.join(__dirname,'/client/build/index.html'));
     });
     
     const port = process.env.PORT || 5000;
