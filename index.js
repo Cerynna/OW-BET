@@ -166,7 +166,8 @@ app.post('/api/signIn', (req, res) => {
     
     // Handles any requests that don't match the ones above
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname,'/client/build/index.html'));
+        const index = path.join(__dirname,'/client/build/index.html')
+        res.sendFile(index);
     });
     
     const port = process.env.PORT || 5000;
