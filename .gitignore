@@ -1,2 +1,7 @@
 node_modules
 client/node_modules
+client/package-lock.json
+client/package.json
+client/.gitignore
+client/README.md
+client/yarn.lock
