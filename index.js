@@ -167,6 +167,7 @@ app.post('/api/signIn', (req, res) => {
     // Handles any requests that don't match the ones above
     app.get('*', (req, res) => {
         const index = path.join('client','build/index.html')
+        console.log(index);
         res.sendFile(index);
     });
     
