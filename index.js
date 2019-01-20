@@ -50,11 +50,16 @@ app.use(bodyParser.urlencoded({
     extended: true
 })); // support encoded bodies
 
-// An api endpoint that returns a short list of items
-app.get('/api/getList', (req, res) => {
-    var list = ["item1", "item2", "item3"];
-    res.json(list);
-    console.log('Sent list of items');
+app.get('/api/getHome', (req, res) => {
+ var Home = firebase.database().ref('/Home');
+
+ Home.once("value", function(snapshot) {
+     res.json(snapshot.val());
+ }, function (error) {
+     console.log("Error: " + error.code);
+ });
+
+
 });
 app.post('/api/login', (req, res) => {
     const player = {
