@@ -74,7 +74,7 @@ app.post('/api/login', (req, res) => {
                 });
                 res.json({
                     status: true,
-                    message: "Tu va etre redirigé",
+                    message: `Bienvenue ${player.login}, tu vas maintenant etre redirigé vers la Home`,
                     data: snapshot.val()
                 });
             } else {
