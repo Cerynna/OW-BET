@@ -175,14 +175,14 @@ app.post('/api/signIn', (req, res) => {
             
             res.json({
                 status: true,
-                message: `GO ${player.name} !`,
+                message: `Bienvenue ${player.name}, tu es maintenant inscrit et connecté au site !`,
                 data: player
             })
             
         } else {
             res.json({
                 status: false,
-                message: `Tu essayer d'usurpé l'identité de ${player.login} !`
+                message: `Le Pseudo ${player.name} est déja utilisé !`
             })
         }
     }, function (error) {
@@ -198,9 +198,7 @@ app.post('/api/sendBet', (req, res) => {
     const user = req.body.user;
     
     
-    if(isNaN(scoreA) || isNaN(scoreB)){
-        console.log("HUM PAS DE CHIFFRE")
-    }else{
+    if(!isNaN(scoreA) || !isNaN(scoreB)){
         var playersRef = firebase.database().ref(`players/${user.name}/bets/${idMatch}`);
         playersRef.update ({
             scoreA: scoreA,
@@ -209,7 +207,6 @@ app.post('/api/sendBet', (req, res) => {
     }
     
     var playerBets = firebase.database().ref(`players/${user.name}/bets`);
-    
     playerBets.once("value", function(snapshot) {
         res.json(snapshot.val())
     }, function (error) {
