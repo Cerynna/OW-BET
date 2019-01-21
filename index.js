@@ -50,17 +50,68 @@ app.use(bodyParser.urlencoded({
     extended: true
 })); // support encoded bodies
 
-app.get('/api/getHome', (req, res) => {
- var Home = firebase.database().ref('/Home');
+app.get('/api/getPlayersRanking', (req, res) => {
+    var Players = firebase.database().ref('/players');
+    
+    Players.once("value", function(snapshot) {
+        const players = snapshot.val();
+        keysPlayers = Object.keys(players);
+        
+        let arrayPlayers = keysPlayers.map((pseudo)=>{
+            delete players[pseudo].mdp;
+            delete players[pseudo].mail;
+            return players[pseudo];
+        })
 
- Home.once("value", function(snapshot) {
-     res.json(snapshot.val());
- }, function (error) {
-     console.log("Error: " + error.code);
- });
+        
+        arrayPlayers =  arrayPlayers.sort(function(a, b) {
+            var textA = a.name.toUpperCase();
+            var textB = b.name.toUpperCase();
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        });
+        arrayPlayers = arrayPlayers.sort(function(a, b){
+            return b.score - a.score;
+        })
 
-
+        res.json(arrayPlayers);
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+    
+    
 });
+
+
+app.get('/api/getHome', (req, res) => {
+    var Home = firebase.database().ref('/Home');
+    
+    Home.once("value", function(snapshot) {
+        res.json(snapshot.val());
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+    
+    
+});
+
+app.post('/api/loveTeam', (req, res)=>{
+    console.log(req.body.user);
+    console.log(req.body.teamId);
+
+  var playersRef = firebase.database().ref(`players/${req.body.user}`);
+  playersRef.update ({loveTeam:req.body.teamId});
+
+    
+    var Player = firebase.database().ref(`players/${req.body.user}`);
+    
+    Player.once("value", function(snapshot) {
+        res.json(snapshot.val());
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+})
+
+
 app.post('/api/login', (req, res) => {
     const player = {
         login: req.body.login,
@@ -122,58 +173,58 @@ app.post('/api/signIn', (req, res) => {
             var playersRef = firebase.database().ref(`/players/${player.name}`);
             playersRef.update (player);
             
-                res.json({
-                    status: true,
-                    message: `GO ${player.name} !`,
-                    data: player
-                })
-                
-            } else {
-                res.json({
-                    status: false,
-                    message: `Tu essayer d'usurpé l'identité de ${player.login} !`
-                })
-            }
-        }, function (error) {
-            console.log("Error: " + error.code);
-        });
-        
-    })
-    app.post('/api/sendBet', (req, res) => {
-        console.log(req.body);
-        const scoreA = parseInt(req.body.scoreA) ;
-        const scoreB = parseInt(req.body.scoreB);
-        const idMatch = parseInt(req.body.idMatch);
-        const user = req.body.user;
-        
-        
-        if(isNaN(scoreA) || isNaN(scoreB)){
-            console.log("HUM PAS DE CHIFFRE")
-        }else{
-            var playersRef = firebase.database().ref(`players/${user.name}/bets/${idMatch}`);
-            playersRef.update ({
-                scoreA: scoreA,
-                scoreB: scoreB
-            });
+            res.json({
+                status: true,
+                message: `GO ${player.name} !`,
+                data: player
+            })
+            
+        } else {
+            res.json({
+                status: false,
+                message: `Tu essayer d'usurpé l'identité de ${player.login} !`
+            })
         }
-        
-        var playerBets = firebase.database().ref(`players/${user.name}/bets`);
-        
-        playerBets.once("value", function(snapshot) {
-            res.json(snapshot.val())
-        }, function (error) {
-            console.log("Error: " + error.code);
-        });
-        
-    })
-    
-    // Handles any requests that don't match the ones above
-    app.get('*', (req, res) => {
-        const index = path.join(__dirname , '/build/index.html');
-        res.sendFile(path.join(index));
+    }, function (error) {
+        console.log("Error: " + error.code);
     });
     
-    const port = process.env.PORT || 5000;
-    app.listen(port);
+})
+app.post('/api/sendBet', (req, res) => {
+    console.log(req.body);
+    const scoreA = parseInt(req.body.scoreA) ;
+    const scoreB = parseInt(req.body.scoreB);
+    const idMatch = parseInt(req.body.idMatch);
+    const user = req.body.user;
     
-    console.log('App is listening on port ' + port);
+    
+    if(isNaN(scoreA) || isNaN(scoreB)){
+        console.log("HUM PAS DE CHIFFRE")
+    }else{
+        var playersRef = firebase.database().ref(`players/${user.name}/bets/${idMatch}`);
+        playersRef.update ({
+            scoreA: scoreA,
+            scoreB: scoreB
+        });
+    }
+    
+    var playerBets = firebase.database().ref(`players/${user.name}/bets`);
+    
+    playerBets.once("value", function(snapshot) {
+        res.json(snapshot.val())
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+    
+})
+
+// Handles any requests that don't match the ones above
+app.get('*', (req, res) => {
+    const index = path.join(__dirname , '/build/index.html');
+    res.sendFile(path.join(index));
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port);
+
+console.log('App is listening on port ' + port);
