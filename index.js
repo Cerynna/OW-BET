@@ -52,24 +52,24 @@ app.use(bodyParser.urlencoded({
 
 app.get('/api/getPlayersRanking', (req, res) => {
     var Players = firebase.database().ref('/players');
-    
-    Players.once("value", function(snapshot) {
+
+    Players.once("value", function (snapshot) {
         const players = snapshot.val();
         keysPlayers = Object.keys(players);
-        
-        let arrayPlayers = keysPlayers.map((pseudo)=>{
+
+        let arrayPlayers = keysPlayers.map((pseudo) => {
             delete players[pseudo].mdp;
             delete players[pseudo].mail;
             return players[pseudo];
         })
 
-        
-        arrayPlayers =  arrayPlayers.sort(function(a, b) {
+
+        arrayPlayers = arrayPlayers.sort(function (a, b) {
             var textA = a.name.toUpperCase();
             var textB = b.name.toUpperCase();
             return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
         });
-        arrayPlayers = arrayPlayers.sort(function(a, b){
+        arrayPlayers = arrayPlayers.sort(function (a, b) {
             return b.score - a.score;
         })
 
@@ -77,34 +77,36 @@ app.get('/api/getPlayersRanking', (req, res) => {
     }, function (error) {
         console.log("Error: " + error.code);
     });
-    
-    
+
+
 });
 
 
 app.get('/api/getHome', (req, res) => {
     var Home = firebase.database().ref('/Home');
-    
-    Home.once("value", function(snapshot) {
+
+    Home.once("value", function (snapshot) {
         res.json(snapshot.val());
     }, function (error) {
         console.log("Error: " + error.code);
     });
-    
-    
+
+
 });
 
-app.post('/api/loveTeam', (req, res)=>{
+app.post('/api/loveTeam', (req, res) => {
     console.log(req.body.user);
     console.log(req.body.teamId);
 
-  var playersRef = firebase.database().ref(`players/${req.body.user}`);
-  playersRef.update ({loveTeam:req.body.teamId});
+    var playersRef = firebase.database().ref(`players/${req.body.user}`);
+    playersRef.update({
+        loveTeam: req.body.teamId
+    });
 
-    
+
     var Player = firebase.database().ref(`players/${req.body.user}`);
-    
-    Player.once("value", function(snapshot) {
+
+    Player.once("value", function (snapshot) {
         res.json(snapshot.val());
     }, function (error) {
         console.log("Error: " + error.code);
@@ -117,11 +119,12 @@ app.post('/api/login', (req, res) => {
         login: req.body.login,
         pass: req.body.pass
     };
-    
+
     const playerDB = firebase.database().ref(`/players/${player.login}`);
     playerDB.once("value", function (snapshot) {
         if (snapshot.val() != null) {
             player.snap = snapshot.val();
+            player.snap.login = player.login;
             if (passwordHash.verify(player.pass, player.snap.mdp)) {
                 login = true;
                 const playersRef = firebase.database().ref(`/players/${player.login}`);
@@ -131,15 +134,15 @@ app.post('/api/login', (req, res) => {
                 res.json({
                     status: true,
                     message: `Bienvenue ${player.login}, tu vas maintenant etre redirigé vers la Home`,
-                    data: snapshot.val()
+                    data: player.snap
                 });
             } else {
                 res.json({
                     status: false,
-                    message: "Pseudo ou Password faux !"
+                    message: "Password faux !"
                 })
             }
-            
+
         } else {
             res.json({
                 status: false,
@@ -151,6 +154,48 @@ app.post('/api/login', (req, res) => {
     });
 })
 
+app.post('/api/updatePlayer', (req, res) => {
+    const user = req.body.user;
+
+
+    let newMDP = user.mdp.match(/sha1\$/);
+
+    const playersRef = firebase.database().ref(`/players/${user.login}`);
+
+    if (newMDP != null) {
+        playersRef.update(user);
+        res.json({
+            redirect: false,
+            message: 'Profil Modifier',
+            user: user
+        });
+    } else {
+        console.log('NEW PASS');
+        const newPass = passwordHash.generate(user.mdp);
+        user.mdp = newPass;
+        playersRef.update(user);
+        res.json({
+            redirect: true,
+            message: 'Profil modifié, tu va etre redirigé',
+            user: user
+        });
+    }
+
+
+    // const player = {
+    //     name: req.body.login,
+    //     score: 0,
+    //     mail: "",
+    //     mdp: passwordHash.generate(req.body.pass),
+    //     status: 1,
+    //     lastLogin: 0,
+    //     bets:{}
+
+    // };
+
+
+
+})
 
 app.post('/api/signIn', (req, res) => {
     console.log(req.body);
@@ -161,24 +206,25 @@ app.post('/api/signIn', (req, res) => {
         mdp: passwordHash.generate(req.body.pass),
         status: 1,
         lastLogin: 0,
-        bets:{}
-        
+        bets: {}
+
     };
-    
-    
+
+
+
     const playerDB = firebase.database().ref(`/players/${player.name}`);
     playerDB.once("value", function (snapshot) {
         if (snapshot.val() == null) {
-            
+
             var playersRef = firebase.database().ref(`/players/${player.name}`);
-            playersRef.update (player);
-            
+            playersRef.update(player);
+
             res.json({
                 status: true,
                 message: `Bienvenue ${player.name}, tu es maintenant inscrit et connecté au site !`,
                 data: player
             })
-            
+
         } else {
             res.json({
                 status: false,
@@ -188,36 +234,36 @@ app.post('/api/signIn', (req, res) => {
     }, function (error) {
         console.log("Error: " + error.code);
     });
-    
+
 })
 app.post('/api/sendBet', (req, res) => {
     console.log(req.body);
-    const scoreA = parseInt(req.body.scoreA) ;
+    const scoreA = parseInt(req.body.scoreA);
     const scoreB = parseInt(req.body.scoreB);
     const idMatch = parseInt(req.body.idMatch);
     const user = req.body.user;
-    
-    
-    if(!isNaN(scoreA) || !isNaN(scoreB)){
+
+
+    if (!isNaN(scoreA) || !isNaN(scoreB)) {
         var playersRef = firebase.database().ref(`players/${user.name}/bets/${idMatch}`);
-        playersRef.update ({
+        playersRef.update({
             scoreA: scoreA,
             scoreB: scoreB
         });
     }
-    
+
     var playerBets = firebase.database().ref(`players/${user.name}/bets`);
-    playerBets.once("value", function(snapshot) {
+    playerBets.once("value", function (snapshot) {
         res.json(snapshot.val())
     }, function (error) {
         console.log("Error: " + error.code);
     });
-    
+
 })
 
 // Handles any requests that don't match the ones above
 app.get('*', (req, res) => {
-    const index = path.join(__dirname , '/build/index.html');
+    const index = path.join(__dirname, '/build/index.html');
     res.sendFile(path.join(index));
 });
 
