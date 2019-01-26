@@ -245,14 +245,14 @@ app.post('/api/sendBet', (req, res) => {
 
 
     if (!isNaN(scoreA) || !isNaN(scoreB)) {
-        var playersRef = firebase.database().ref(`players/${user.name}/bets/${idMatch}`);
+        var playersRef = firebase.database().ref(`players/${user.login}/bets/${idMatch}`);
         playersRef.update({
             scoreA: scoreA,
             scoreB: scoreB
         });
     }
 
-    var playerBets = firebase.database().ref(`players/${user.name}/bets`);
+    var playerBets = firebase.database().ref(`players/${user.login}/bets`);
     playerBets.once("value", function (snapshot) {
         res.json(snapshot.val())
     }, function (error) {
