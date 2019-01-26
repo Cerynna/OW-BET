@@ -201,6 +201,7 @@ app.post('/api/signIn', (req, res) => {
     console.log(req.body);
     const player = {
         name: req.body.login,
+        login: req.body.login,
         score: 0,
         mail: "",
         mdp: passwordHash.generate(req.body.pass),
