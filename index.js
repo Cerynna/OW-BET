@@ -154,6 +154,24 @@ app.post('/api/login', (req, res) => {
     });
 })
 
+app.get('/api/getPlayer/:idPlayer', (req, res) => {
+    
+
+
+    var Player = firebase.database().ref(`/players/${req.params.idPlayer}`);
+
+    Player.on("value", function (snapshot) {
+        console.log(snapshot.val());
+        const user = snapshot.val();
+        delete user.mdp;
+        delete user.mail;
+        res.json(user)
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+
+})
+
 app.post('/api/updatePlayer', (req, res) => {
     const user = req.body.user;
 
