@@ -155,13 +155,12 @@ app.post('/api/login', (req, res) => {
 })
 
 app.get('/api/getPlayer/:idPlayer', (req, res) => {
-    
-
+    console.log(req.params.idPlayer);
 
     var Player = firebase.database().ref(`/players/${req.params.idPlayer}`);
 
-    Player.on("value", function (snapshot) {
-        console.log(snapshot.val());
+    Player.once("value", function (snapshot) {
+        console.log('snap', snapshot.val());
         const user = snapshot.val();
         delete user.mdp;
         delete user.mail;
@@ -256,14 +255,14 @@ app.post('/api/signIn', (req, res) => {
 
 })
 app.post('/api/sendBet', (req, res) => {
-    console.log(req.body);
+    console.log("Send BETS " + req.body.user.name);
     const scoreA = parseInt(req.body.scoreA);
     const scoreB = parseInt(req.body.scoreB);
     const idMatch = parseInt(req.body.idMatch);
     const user = req.body.user;
 
 
-    if (!isNaN(scoreA) || !isNaN(scoreB)) {
+    if (!isNaN(scoreA) && !isNaN(scoreB)) {
         var playersRef = firebase.database().ref(`players/${user.login}/bets/${idMatch}`);
         playersRef.update({
             scoreA: scoreA,
