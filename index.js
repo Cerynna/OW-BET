@@ -180,14 +180,18 @@ app.get('/api/getPlayer/:idPlayer', (req, res) => {
 })
 
 app.post('/api/updatePlayer', (req, res) => {
+
+    console.log('UPDATE PLAYER');
+
     const user = req.body.user;
+    console.log(user);
 
 
-    let newMDP = user.mdp.match(/sha1\$/);
+    let newMDP = (user.mdp) ? user.mdp : null;
 
     const playersRef = firebase.database().ref(`/players/${user.login}`);
 
-    if (newMDP != null) {
+    if (newMDP == null) {
         playersRef.update(user);
         res.json({
             redirect: false,

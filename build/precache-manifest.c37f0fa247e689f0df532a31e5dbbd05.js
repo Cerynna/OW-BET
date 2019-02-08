@@ -4,8 +4,8 @@ self.__precacheManifest = [
     "url": "/static/media/torbjorn.a724b877.png"
   },
   {
-    "revision": "1354eedc3f59cf7d6e82",
-    "url": "/static/css/main.57163a5b.chunk.css"
+    "revision": "3b894ca93dce1c2c7d13",
+    "url": "/static/css/main.df745b0a.chunk.css"
   },
   {
     "revision": "60fa5e789bb6e3007fa7",
@@ -56,24 +56,32 @@ self.__precacheManifest = [
     "url": "/static/media/soldier-76.9824c0bc.png"
   },
   {
-    "revision": "86cc23fb96ad21e107d4463a2876e6eb",
-    "url": "/static/media/symmetra.86cc23fb.png"
-  },
-  {
-    "revision": "1354eedc3f59cf7d6e82",
-    "url": "/static/js/main.1354eedc.chunk.js"
-  },
-  {
     "revision": "86d9f88bc76ae9d0c159f3da09e1d554",
     "url": "/static/media/tracer.86d9f88b.png"
   },
   {
-    "revision": "8f8efeeb217e3240f03b7a140381748d",
-    "url": "/static/media/widowmaker.8f8efeeb.png"
+    "revision": "86cc23fb96ad21e107d4463a2876e6eb",
+    "url": "/static/media/symmetra.86cc23fb.png"
+  },
+  {
+    "revision": "3b894ca93dce1c2c7d13",
+    "url": "/static/js/main.3b894ca9.chunk.js"
   },
   {
     "revision": "416aca98dbc9cddcaee26766eb4cf79b",
     "url": "/static/media/winston.416aca98.png"
+  },
+  {
+    "revision": "e74a58b746317f89b0362879a8543b26",
+    "url": "/static/media/moira.e74a58b7.png"
+  },
+  {
+    "revision": "ac29a42ce02f584a213cca470c065936",
+    "url": "/static/media/doomfist.ac29a42c.png"
+  },
+  {
+    "revision": "8f8efeeb217e3240f03b7a140381748d",
+    "url": "/static/media/widowmaker.8f8efeeb.png"
   },
   {
     "revision": "9ff06b1e7c2abc6a0794c2fec094e540",
@@ -82,6 +90,10 @@ self.__precacheManifest = [
   {
     "revision": "ef0ab6247fdb90ec1f50a0f6287b4d38",
     "url": "/static/media/zenyatta.ef0ab624.png"
+  },
+  {
+    "revision": "ff78c5e2b6c3846035dae28cdaa65583",
+    "url": "/static/media/big_noodle_titling.ff78c5e2.ttf"
   },
   {
     "revision": "c7fe86ae16776eebb5ffe699ab5fb1b4",
@@ -100,23 +112,19 @@ self.__precacheManifest = [
     "url": "/static/media/roadhog.6b9f8ded.png"
   },
   {
-    "revision": "1b662d4c4c97fa6edd4a3fb6485cfe1a",
-    "url": "/static/media/pharah.1b662d4c.png"
-  },
-  {
     "revision": "6fedee3db0eae0736801204b2ebb1960",
     "url": "/static/media/mercy.6fedee3d.png"
   },
   {
-    "revision": "ff78c5e2b6c3846035dae28cdaa65583",
-    "url": "/static/media/big_noodle_titling.ff78c5e2.ttf"
+    "revision": "1b662d4c4c97fa6edd4a3fb6485cfe1a",
+    "url": "/static/media/pharah.1b662d4c.png"
   },
   {
     "revision": "2c111f25c4c970897adb82e426a55069",
     "url": "/static/media/back.2c111f25.jpg"
   },
   {
-    "revision": "d36b04fe7f127874bf7fcb706c05f0f8",
+    "revision": "36b789936729d10b6fd86e6596c47395",
     "url": "/index.html"
   }
 ];
