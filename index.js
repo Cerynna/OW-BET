@@ -162,9 +162,17 @@ app.get('/api/getPlayer/:idPlayer', (req, res) => {
     Player.once("value", function (snapshot) {
         console.log('snap', snapshot.val());
         const user = snapshot.val();
-        delete user.mdp;
-        delete user.mail;
-        res.json(user)
+        if (user != null) {
+            delete user.mdp;
+
+            res.json(user)
+        } else {
+            res.json({
+                login: req.params.idPlayer,
+                error: "Problème avec la Base de donnée le site est en Béta :D"
+            })
+        }
+
     }, function (error) {
         console.log("Error: " + error.code);
     });
