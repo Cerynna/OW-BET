@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const firebase = require('firebase');
 const passwordHash = require('password-hash');
 
+const io = require('socket.io')();
+
 
 var config = {
     apiKey: "AIzaSyDU0TwfdXnT_b4a0MYzBTaEA2dLj3IntEU",
@@ -180,17 +182,9 @@ app.get('/api/getPlayer/:idPlayer', (req, res) => {
 })
 
 app.post('/api/updatePlayer', (req, res) => {
-
-    console.log('UPDATE PLAYER');
-
     const user = req.body.user;
-    console.log(user);
-
-
     let newMDP = (user.mdp) ? user.mdp : null;
-
     const playersRef = firebase.database().ref(`/players/${user.login}`);
-
     if (newMDP == null) {
         playersRef.update(user);
         res.json({
@@ -199,7 +193,6 @@ app.post('/api/updatePlayer', (req, res) => {
             user: user
         });
     } else {
-        console.log('NEW PASS');
         const newPass = passwordHash.generate(user.mdp);
         user.mdp = newPass;
         playersRef.update(user);
@@ -209,26 +202,12 @@ app.post('/api/updatePlayer', (req, res) => {
             user: user
         });
     }
-
-
-    // const player = {
-    //     name: req.body.login,
-    //     score: 0,
-    //     mail: "",
-    //     mdp: passwordHash.generate(req.body.pass),
-    //     status: 1,
-    //     lastLogin: 0,
-    //     bets:{}
-
-    // };
-
-
-
 })
 
 app.post('/api/signIn', (req, res) => {
     console.log(req.body);
     const player = {
+        inscript: Date.now(),
         name: req.body.login,
         login: req.body.login,
         score: 0,
@@ -239,8 +218,6 @@ app.post('/api/signIn', (req, res) => {
         bets: {}
 
     };
-
-
 
     const playerDB = firebase.database().ref(`/players/${player.name}`);
     playerDB.once("value", function (snapshot) {
@@ -297,7 +274,49 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(index));
 });
 
+const userList = [];
+const messagesList = [];
+io.on('connection', function (socket) {
+    socket.on('sendLogin', (user) => {
+        const verifUserList = userList.find((current) => {
+            return current.login == user.login;
+        }) || null;
+        if (verifUserList == null) {
+            userList.push(user);
+        }
+        io.emit('newUser', userList);
+        io.emit('newMessages', messagesList)
+    });
+
+    // socket.on('login', (user) => {
+    //     if (userIO == null) {
+    //         userIO = user;
+    //     }
+
+    // })
+
+    socket.on('sendMessage', (message, user) => {
+        console.log(message);
+        if(message != null && message != ""){
+            messagesList.push({
+                user: user,
+                date: Date.now(),
+                message: message
+            });
+            io.emit('newMessages', messagesList)
+        }
+        
+
+    });
+
+    socket.on('disconnect', function () {
+        console.log('user disconnected');
+
+
+    });
+});
 const port = process.env.PORT || 5000;
+io.listen(port + 1);
 app.listen(port);
 
 console.log('App is listening on port ' + port);
