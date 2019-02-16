@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "8f8efeeb217e3240f03b7a140381748d",
-    "url": "/static/media/widowmaker.8f8efeeb.png"
+    "revision": "a724b877a74fb45412734fdb587fdc6e",
+    "url": "/static/media/torbjorn.a724b877.png"
   },
   {
-    "revision": "35defd6ee9b7286a1f28",
-    "url": "/static/css/main.7ac1007f.chunk.css"
+    "revision": "64d736bcc426480c46f7",
+    "url": "/static/css/main.d07d1888.chunk.css"
   },
   {
     "revision": "a847fda270118094880c",
@@ -16,16 +16,16 @@ self.__precacheManifest = [
     "url": "/static/js/runtime~main.229c360f.js"
   },
   {
-    "revision": "96eebaf5e7cf43c3187d4d122120eba6",
-    "url": "/static/media/sombra.96eebaf5.png"
+    "revision": "9a99063580cd5efab31d0bede96363a7",
+    "url": "/static/media/ana.9a990635.png"
   },
   {
     "revision": "7f6cb7c3c04d689020dfa1c325ef784a",
     "url": "/static/media/bastion.7f6cb7c3.png"
   },
   {
-    "revision": "9a99063580cd5efab31d0bede96363a7",
-    "url": "/static/media/ana.9a990635.png"
+    "revision": "96eebaf5e7cf43c3187d4d122120eba6",
+    "url": "/static/media/sombra.96eebaf5.png"
   },
   {
     "revision": "82b0e6b37a9303b97e6ed6ca2d196dcc",
@@ -56,40 +56,36 @@ self.__precacheManifest = [
     "url": "/static/media/soldier-76.9824c0bc.png"
   },
   {
+    "revision": "86d9f88bc76ae9d0c159f3da09e1d554",
+    "url": "/static/media/tracer.86d9f88b.png"
+  },
+  {
     "revision": "86cc23fb96ad21e107d4463a2876e6eb",
     "url": "/static/media/symmetra.86cc23fb.png"
   },
   {
-    "revision": "a724b877a74fb45412734fdb587fdc6e",
-    "url": "/static/media/torbjorn.a724b877.png"
-  },
-  {
-    "revision": "35defd6ee9b7286a1f28",
-    "url": "/static/js/main.35defd6e.chunk.js"
-  },
-  {
-    "revision": "86d9f88bc76ae9d0c159f3da09e1d554",
-    "url": "/static/media/tracer.86d9f88b.png"
+    "revision": "64d736bcc426480c46f7",
+    "url": "/static/js/main.64d736bc.chunk.js"
   },
   {
     "revision": "416aca98dbc9cddcaee26766eb4cf79b",
     "url": "/static/media/winston.416aca98.png"
   },
   {
-    "revision": "9ff06b1e7c2abc6a0794c2fec094e540",
-    "url": "/static/media/zarya.9ff06b1e.png"
-  },
-  {
-    "revision": "ef0ab6247fdb90ec1f50a0f6287b4d38",
-    "url": "/static/media/zenyatta.ef0ab624.png"
-  },
-  {
     "revision": "e74a58b746317f89b0362879a8543b26",
     "url": "/static/media/moira.e74a58b7.png"
   },
   {
+    "revision": "8f8efeeb217e3240f03b7a140381748d",
+    "url": "/static/media/widowmaker.8f8efeeb.png"
+  },
+  {
     "revision": "ac29a42ce02f584a213cca470c065936",
     "url": "/static/media/doomfist.ac29a42c.png"
+  },
+  {
+    "revision": "ff78c5e2b6c3846035dae28cdaa65583",
+    "url": "/static/media/big_noodle_titling.ff78c5e2.ttf"
   },
   {
     "revision": "c7fe86ae16776eebb5ffe699ab5fb1b4",
@@ -100,31 +96,35 @@ self.__precacheManifest = [
     "url": "/static/media/junkrat.897791f6.png"
   },
   {
-    "revision": "d620909a52bbfa7e14a242d39801e25e",
-    "url": "/static/media/mei.d620909a.png"
+    "revision": "6b9f8ded4bfa73653a72bb2b4cfdec65",
+    "url": "/static/media/roadhog.6b9f8ded.png"
   },
   {
     "revision": "6fedee3db0eae0736801204b2ebb1960",
     "url": "/static/media/mercy.6fedee3d.png"
   },
   {
-    "revision": "6b9f8ded4bfa73653a72bb2b4cfdec65",
-    "url": "/static/media/roadhog.6b9f8ded.png"
+    "revision": "d620909a52bbfa7e14a242d39801e25e",
+    "url": "/static/media/mei.d620909a.png"
   },
   {
     "revision": "1b662d4c4c97fa6edd4a3fb6485cfe1a",
     "url": "/static/media/pharah.1b662d4c.png"
   },
   {
-    "revision": "ff78c5e2b6c3846035dae28cdaa65583",
-    "url": "/static/media/big_noodle_titling.ff78c5e2.ttf"
+    "revision": "9ff06b1e7c2abc6a0794c2fec094e540",
+    "url": "/static/media/zarya.9ff06b1e.png"
+  },
+  {
+    "revision": "ef0ab6247fdb90ec1f50a0f6287b4d38",
+    "url": "/static/media/zenyatta.ef0ab624.png"
   },
   {
     "revision": "2c111f25c4c970897adb82e426a55069",
     "url": "/static/media/back.2c111f25.jpg"
   },
   {
-    "revision": "037b4c9e4e6af06f169c3ee1ba80edf8",
+    "revision": "2371b0154def46718d8ab38a076f17fb",
     "url": "/index.html"
   }
 ];
