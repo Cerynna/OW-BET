@@ -27,9 +27,9 @@ function calculScore() {
             response.data.data.stages.map((stage) => {
                 stage.weeks.map((week) => {
                     week.matches.map((match) => {
-                        if (match.startDateTS < Date.now() && match.showEndTime == true) {
+                        if (match.startDateTS < Date.now()) {
                             if (match.scores[0].value != 0 || match.scores[1].value != 0) {
-                                if (match.endDateTS < Date.now()) {
+                                if (match.endDateTS < Date.now() && match.showEndTime == true) {
                                     const Players = firebase.database().ref('/players');
                                     Players.once("value", function (snapshot) {
                                         const playersDB = snapshot.val();
@@ -93,7 +93,6 @@ function calculScore() {
 }
 
 
-calculScore();
 
 
 
@@ -220,6 +219,19 @@ app.post('/api/loveTeam', (req, res) => {
         console.log("Error: " + error.code);
     });
 })
+app.post('/api/sendAchievement', (req, res) => {
+
+    const {
+        user,
+        achievement
+    } = req.body;
+    const playerDB = firebase.database().ref(`/players/${user}/achievement/${achievement}`);
+    playerDB.update({
+        date: Date.now(),
+        valid: true
+    });
+})
+
 
 
 app.post('/api/login', (req, res) => {
@@ -379,7 +391,7 @@ app.get('*', (req, res) => {
 });
 
 const userList = [];
-const messagesList = [];
+
 io.on('connection', function (socket) {
     let currentUser;
     socket.on('sendLogin', (user) => {
@@ -391,7 +403,12 @@ io.on('connection', function (socket) {
             currentUser = user;
         }
         io.emit('newUser', userList);
-        io.emit('newMessages', messagesList)
+        chatMessage = firebase.database().ref('/chat/');
+            chatMessage.on("value", function (snapshot) {
+                io.emit('newMessages', snapshot.val())
+            }, function (error) {
+                console.log("Error: " + error.code);
+            });
     });
 
     // socket.on('login', (user) => {
@@ -403,12 +420,19 @@ io.on('connection', function (socket) {
 
     socket.on('sendMessage', (message, user) => {
         if (message != null && message != "") {
-            messagesList.push({
+console.log('NEW MESSAGE CHAT');
+            var updateChat = firebase.database().ref(`/chat/${Date.now()}`);
+            updateChat.update({
                 user: user,
                 date: Date.now(),
                 message: message
             });
-            io.emit('newMessages', messagesList)
+
+            
+
+
+
+            
         }
 
 
