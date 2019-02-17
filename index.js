@@ -38,6 +38,41 @@ function calculScore() {
                                             currentUser[pseudo] = {
                                                 score: (currentUser[pseudo]) ? currentUser[pseudo].score : playersDB[pseudo].score
                                             }
+                                            let score = 0;
+                                            let scorePlayerRef = firebase.database().ref(`players/${pseudo}/bets`);
+                                            scorePlayerRef.once('value', (snapshot) => {
+                                                const bets = snapshot.val();
+                                                if (bets != null) {
+                                                    let keyBets = Object.keys(bets);
+                                                    keyBets.map((key) => {
+                                                        if(bets[key].score){
+                                                            score = score + parseInt(bets[key].score);
+                                                        }
+                                                    })
+                                                }
+
+                                                let scorePlayer = firebase.database().ref(`players/${pseudo}`);
+                                                scorePlayer.update({
+                                                    score: score
+                                                });
+                                            })
+
+
+                                            if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id] && playersDB[pseudo].bets[match.id].valid == true) {
+                                                if (playersDB[pseudo].bets[match.id].resultA != match.scores[0].value || playersDB[pseudo].bets[match.id].resultB != match.scores[1].value) {
+                                                    let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
+                                                    betsPlayer.update({
+                                                        valid: false,
+                                                        score: 0,
+                                                        resultA: match.scores[0].value,
+                                                        resultB: match.scores[1].value,
+                                                        TeamA: match.competitors[0].abbreviatedName,
+                                                        TeamB: match.competitors[1].abbreviatedName
+                                                    });
+                                                }
+                                            }
+
+
                                             if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id] && playersDB[pseudo].bets[match.id].valid != true) {
                                                 const winTeam = (match.scores[0].value > match.scores[1].value) ? "A" : "B";
                                                 const winBet = (playersDB[pseudo].bets[match.id].scoreA > playersDB[pseudo].bets[match.id].scoreB) ? "A" : "B";
@@ -65,10 +100,10 @@ function calculScore() {
                                                     TeamB: match.competitors[1].abbreviatedName
                                                 });
                                                 currentUser[pseudo].score += currentScore;
-                                                let scorePlayer = firebase.database().ref(`players/${pseudo}`);
-                                                scorePlayer.update({
-                                                    score: currentUser[pseudo].score
-                                                });
+
+
+
+                                                
                                             }
 
                                         })
@@ -90,10 +125,12 @@ function calculScore() {
             console.log(error);
         });
 
+
+
 }
 
 
-
+calculScore();
 
 
 cron.schedule('*/30 * * * *', () => {
@@ -404,11 +441,11 @@ io.on('connection', function (socket) {
         }
         io.emit('newUser', userList);
         chatMessage = firebase.database().ref('/chat/');
-            chatMessage.on("value", function (snapshot) {
-                io.emit('newMessages', snapshot.val())
-            }, function (error) {
-                console.log("Error: " + error.code);
-            });
+        chatMessage.on("value", function (snapshot) {
+            io.emit('newMessages', snapshot.val())
+        }, function (error) {
+            console.log("Error: " + error.code);
+        });
     });
 
     // socket.on('login', (user) => {
@@ -420,7 +457,7 @@ io.on('connection', function (socket) {
 
     socket.on('sendMessage', (message, user) => {
         if (message != null && message != "") {
-console.log('NEW MESSAGE CHAT');
+            console.log('NEW MESSAGE CHAT');
             var updateChat = firebase.database().ref(`/chat/${Date.now()}`);
             updateChat.update({
                 user: user,
@@ -428,11 +465,11 @@ console.log('NEW MESSAGE CHAT');
                 message: message
             });
 
-            
 
 
 
-            
+
+
         }
 
 
