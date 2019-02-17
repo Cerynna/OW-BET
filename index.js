@@ -23,11 +23,11 @@ firebase.initializeApp(config);
 function calculScore() {
     axios.get('https://api.overwatchleague.com/schedule')
         .then(function (response) {
-            let test = [];
+            let currentUser = [];
             response.data.data.stages.map((stage) => {
                 stage.weeks.map((week) => {
                     week.matches.map((match) => {
-                        if (match.startDateTS < Date.now()) {
+                        if (match.startDateTS < Date.now() && match.showEndTime == true) {
                             if (match.scores[0].value != 0 || match.scores[1].value != 0) {
                                 if (match.endDateTS < Date.now()) {
                                     const Players = firebase.database().ref('/players');
@@ -35,13 +35,14 @@ function calculScore() {
                                         const playersDB = snapshot.val();
                                         let keysPlayers = Object.keys(playersDB);
                                         keysPlayers.map((pseudo) => {
-                                            test[pseudo] = {
-                                                score: (test[pseudo]) ? test[pseudo].score : playersDB[pseudo].score
+                                            currentUser[pseudo] = {
+                                                score: (currentUser[pseudo]) ? currentUser[pseudo].score : playersDB[pseudo].score
                                             }
                                             if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id] && playersDB[pseudo].bets[match.id].valid != true) {
                                                 const winTeam = (match.scores[0].value > match.scores[1].value) ? "A" : "B";
                                                 const winBet = (playersDB[pseudo].bets[match.id].scoreA > playersDB[pseudo].bets[match.id].scoreB) ? "A" : "B";
                                                 let currentScore = 0;
+
                                                 if (winTeam == winBet) {
                                                     currentScore += 10;
                                                 }
@@ -56,12 +57,17 @@ function calculScore() {
                                                 }
                                                 let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
                                                 betsPlayer.update({
-                                                    valid: true
+                                                    valid: true,
+                                                    score: currentScore,
+                                                    resultA: match.scores[0].value,
+                                                    resultB: match.scores[1].value,
+                                                    TeamA: match.competitors[0].abbreviatedName,
+                                                    TeamB: match.competitors[1].abbreviatedName
                                                 });
-                                                test[pseudo].score += currentScore;
+                                                currentUser[pseudo].score += currentScore;
                                                 let scorePlayer = firebase.database().ref(`players/${pseudo}`);
                                                 scorePlayer.update({
-                                                    score: test[pseudo].score
+                                                    score: currentUser[pseudo].score
                                                 });
                                             }
 
@@ -87,12 +93,25 @@ function calculScore() {
 }
 
 
+calculScore();
+
+
 
 cron.schedule('*/30 * * * *', () => {
-    console.log('CRON SCORE')
+    let date = new Date();
+    console.log('CRON SCORE');
+    console.log({
+        ts: date.getTime(),
+        day: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+        hours: date.getHours(),
+        min: date.getMinutes(),
+
+    });
     calculScore();
     let updateDB = firebase.database().ref(`update/${Date.now()}`);
-    let date = new Date();
+
     updateDB.update({
         ts: date.getTime(),
         day: date.getDate(),
@@ -330,6 +349,7 @@ app.post('/api/sendBet', (req, res) => {
     const scoreB = parseInt(req.body.scoreB);
     const idMatch = parseInt(req.body.idMatch);
     const user = req.body.user;
+    console.log(req.body.idMatch);
 
     axios.get(`https://api.overwatchleague.com/matches/${idMatch}`).then((response) => {
         if (response.data.startDate > Date.now()) {
