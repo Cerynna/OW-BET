@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "build": "cd client && yarn build"
+    "build": "rm -rf build && cd client && yarn build"
   },
   "dependencies": {
     "axios": "^0.18.0",

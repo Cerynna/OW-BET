@@ -398,7 +398,7 @@ app.post('/api/sendBet', (req, res) => {
     const scoreB = parseInt(req.body.scoreB);
     const idMatch = parseInt(req.body.idMatch);
     const user = req.body.user;
-    console.log(req.body.idMatch);
+    console.log(req.body.idMatch, user.login);
 
     axios.get(`https://api.overwatchleague.com/matches/${idMatch}`).then((response) => {
         if (response.data.startDate > Date.now()) {
