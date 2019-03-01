@@ -20,7 +20,7 @@ var config = {
 };
 firebase.initializeApp(config);
 
-function calculScore() {
+function calculBetsUsers() {
     axios.get('https://api.overwatchleague.com/schedule')
         .then(function (response) {
             let currentUser = [];
@@ -38,24 +38,24 @@ function calculScore() {
                                             currentUser[pseudo] = {
                                                 score: (currentUser[pseudo]) ? currentUser[pseudo].score : playersDB[pseudo].score
                                             }
-                                            let score = 0;
-                                            let scorePlayerRef = firebase.database().ref(`players/${pseudo}/bets`);
-                                            scorePlayerRef.once('value', (snapshot) => {
-                                                const bets = snapshot.val();
-                                                if (bets != null) {
-                                                    let keyBets = Object.keys(bets);
-                                                    keyBets.map((key) => {
-                                                        if(bets[key].score){
-                                                            score = score + parseInt(bets[key].score);
-                                                        }
-                                                    })
-                                                }
+                                            // let score = 0;
+                                            // let scorePlayerRef = firebase.database().ref(`players/${pseudo}/bets`);
+                                            // scorePlayerRef.once('value', (snapshot) => {
+                                            //     const bets = snapshot.val();
+                                            //     if (bets != null) {
+                                            //         let keyBets = Object.keys(bets);
+                                            //         keyBets.map((key) => {
+                                            //             if (bets[key].score) {
+                                            //                 score = score + parseInt(bets[key].score);
+                                            //             }
+                                            //         })
+                                            //     }
 
-                                                let scorePlayer = firebase.database().ref(`players/${pseudo}`);
-                                                scorePlayer.update({
-                                                    score: score
-                                                });
-                                            })
+                                            //     let scorePlayer = firebase.database().ref(`players/${pseudo}`);
+                                            //     scorePlayer.update({
+                                            //         score: score
+                                            //     });
+                                            // })
 
 
                                             if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id] && playersDB[pseudo].bets[match.id].valid == true) {
@@ -85,9 +85,10 @@ function calculScore() {
                                                     currentScore += 10;
                                                 }
                                                 if (match.competitors[0].abbreviatedName == playersDB[pseudo].loveTeam || match.competitors[1].abbreviatedName == playersDB[pseudo].loveTeam) {
-                                                    if (currentScore == 0) {
-                                                        currentScore += 10;
-                                                    }
+                                                    // MEME SI 0 POINT +10 BUFF ALLSTAR
+                                                    // if (currentScore == 0) {
+                                                    //     currentScore += 10;
+                                                    // }
                                                     currentScore *= 2;
                                                 }
                                                 let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
@@ -103,7 +104,7 @@ function calculScore() {
 
 
 
-                                                
+
                                             }
 
                                         })
@@ -130,12 +131,74 @@ function calculScore() {
 }
 
 
-calculScore();
+function calculScoreUser(user = "Hystérias") {
+
+    const Players = firebase.database().ref(`/players/${user}`);
+    Players.once("value", function (snapshot) {
+
+        const userDB = snapshot.val();
+        const bets = userDB.bets;
+        if(bets){
+            let keysBets = Object.keys(bets);
+            let currentScore = {
+                total: 0,
+                win: 0,
+                lose: 0,
+                totalBets:0
+            }
+            
+            keysBets.map((key) => {
+                if (bets[key].valid) {
+                    axios.get(`https://api.overwatchleague.com/matches/${key}`)
+                        .then((res) => {
+                            // console.log(bets[key]);
+                            bets[key].date = res.data.endDate;
+                            currentScore.total += bets[key].score;
+    
+                            const winTeam = (bets[key].resultA > bets[key].resultB) ? "A" : "B";
+                            const winBet = (bets[key].scoreA > bets[key].scoreB) ? "A" : "B";
+    
+                            if(winTeam == winBet){
+                                currentScore.win += 1; 
+                            }else{
+                                currentScore.lose += 1; 
+                            }
+                            currentScore.totalBets += 1; 
+                            userDB.bets = bets;
+                            userDB.score = currentScore;
+                            Players.update(userDB);
+                            
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        })
+    
+                }
+            })
+        }
+        
+
+    })
+
+}
 
 
-cron.schedule('*/30 * * * *', () => {
+
+calculBetsUsers();
+const PlayerDB = firebase.database().ref(`/players`);
+
+PlayerDB.once("value", function (snapshot) {
+    let keysUser = Object.keys(snapshot.val());
+    // console.log(keysUser);
+    keysUser.map((user)=>{
+        calculScoreUser(user);
+    })
+})
+
+
+cron.schedule('*/5 * * * *', () => {
     let date = new Date();
-    console.log('CRON SCORE');
+    console.log('CRON BETS');
     console.log({
         ts: date.getTime(),
         day: date.getDate(),
@@ -145,7 +208,7 @@ cron.schedule('*/30 * * * *', () => {
         min: date.getMinutes(),
 
     });
-    calculScore();
+    calculBetsUsers();
     let updateDB = firebase.database().ref(`update/${Date.now()}`);
 
     updateDB.update({
@@ -159,7 +222,28 @@ cron.schedule('*/30 * * * *', () => {
     });
 });
 
+cron.schedule('*/5 * * * *', () => {
+    let date = new Date();
+    console.log('CRON SCORE');
+    console.log({
+        ts: date.getTime(),
+        day: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+        hours: date.getHours(),
+        min: date.getMinutes(),
 
+    });
+    const PlayerDB = firebase.database().ref(`/players`);
+
+    PlayerDB.once("value", function (snapshot) {
+        let keysUser = Object.keys(snapshot.val());
+        // console.log(keysUser);
+        keysUser.map((user)=>{
+            calculScoreUser(user);
+        })
+    })
+});
 
 
 
@@ -217,9 +301,12 @@ app.get('/api/getPlayersRanking', (req, res) => {
             return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
         });
         arrayPlayers = arrayPlayers.sort(function (a, b) {
-            return b.score - a.score;
-        })
+            console.log(a.score.total);
+            const tatolA = a.score.total || 0;
+            const tatolB = b.score.total || 0;
 
+            return tatolB - tatolA;
+        })
         res.json(arrayPlayers);
     }, function (error) {
         console.log("Error: " + error.code);
