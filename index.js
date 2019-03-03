@@ -61,6 +61,7 @@ function calculBetsUsers() {
                                             if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id] && playersDB[pseudo].bets[match.id].valid == true) {
                                                 if (playersDB[pseudo].bets[match.id].resultA != match.scores[0].value || playersDB[pseudo].bets[match.id].resultB != match.scores[1].value) {
                                                     let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
+
                                                     betsPlayer.update({
                                                         valid: false,
                                                         score: 0,
@@ -77,28 +78,35 @@ function calculBetsUsers() {
                                                 const winTeam = (match.scores[0].value > match.scores[1].value) ? "A" : "B";
                                                 const winBet = (playersDB[pseudo].bets[match.id].scoreA > playersDB[pseudo].bets[match.id].scoreB) ? "A" : "B";
                                                 let currentScore = 0;
-
+                                                let type = 'lose';
                                                 if (winTeam == winBet) {
                                                     currentScore += 10;
+                                                    type = 'win'
                                                 }
                                                 if (match.scores[0].value == playersDB[pseudo].bets[match.id].scoreA && match.scores[1].value == playersDB[pseudo].bets[match.id].scoreB) {
                                                     currentScore += 10;
+                                                    type = 'full'
                                                 }
                                                 if (match.competitors[0].abbreviatedName == playersDB[pseudo].loveTeam || match.competitors[1].abbreviatedName == playersDB[pseudo].loveTeam) {
                                                     // MEME SI 0 POINT +10 BUFF ALLSTAR
                                                     // if (currentScore == 0) {
                                                     //     currentScore += 10;
                                                     // }
+                                                    type += 'Team'
                                                     currentScore *= 2;
                                                 }
                                                 let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
+
                                                 betsPlayer.update({
                                                     valid: true,
                                                     score: currentScore,
                                                     resultA: match.scores[0].value,
                                                     resultB: match.scores[1].value,
                                                     TeamA: match.competitors[0].abbreviatedName,
-                                                    TeamB: match.competitors[1].abbreviatedName
+                                                    TeamB: match.competitors[1].abbreviatedName,
+                                                    dateMatch: match.startDateTS,
+                                                    type: type
+
                                                 });
                                                 currentUser[pseudo].score += currentScore;
 
@@ -138,15 +146,15 @@ function calculScoreUser(user = "Hystérias") {
 
         const userDB = snapshot.val();
         const bets = userDB.bets;
-        if(bets){
+        if (bets) {
             let keysBets = Object.keys(bets);
             let currentScore = {
                 total: 0,
                 win: 0,
                 lose: 0,
-                totalBets:0
+                totalBets: 0
             }
-            
+
             keysBets.map((key) => {
                 if (bets[key].valid) {
                     axios.get(`https://api.overwatchleague.com/matches/${key}`)
@@ -154,46 +162,33 @@ function calculScoreUser(user = "Hystérias") {
                             // console.log(bets[key]);
                             bets[key].date = res.data.endDate;
                             currentScore.total += bets[key].score;
-    
+
                             const winTeam = (bets[key].resultA > bets[key].resultB) ? "A" : "B";
                             const winBet = (bets[key].scoreA > bets[key].scoreB) ? "A" : "B";
-    
-                            if(winTeam == winBet){
-                                currentScore.win += 1; 
-                            }else{
-                                currentScore.lose += 1; 
+
+                            if (winTeam == winBet) {
+                                currentScore.win += 1;
+                            } else {
+                                currentScore.lose += 1;
                             }
-                            currentScore.totalBets += 1; 
+                            currentScore.totalBets += 1;
                             userDB.bets = bets;
                             userDB.score = currentScore;
                             Players.update(userDB);
-                            
+
                         })
                         .catch((error) => {
                             console.log(error);
                         })
-    
+
                 }
             })
         }
-        
+
 
     })
 
 }
-
-
-
-calculBetsUsers();
-const PlayerDB = firebase.database().ref(`/players`);
-
-PlayerDB.once("value", function (snapshot) {
-    let keysUser = Object.keys(snapshot.val());
-    // console.log(keysUser);
-    keysUser.map((user)=>{
-        calculScoreUser(user);
-    })
-})
 
 
 cron.schedule('*/5 * * * *', () => {
@@ -239,12 +234,11 @@ cron.schedule('*/5 * * * *', () => {
     PlayerDB.once("value", function (snapshot) {
         let keysUser = Object.keys(snapshot.val());
         // console.log(keysUser);
-        keysUser.map((user)=>{
+        keysUser.map((user) => {
             calculScoreUser(user);
         })
     })
 });
-
 
 
 // Update DATA
