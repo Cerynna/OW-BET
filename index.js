@@ -261,7 +261,7 @@ app.use(express.static(path.join(__dirname, '/build')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
-})); 
+}));
 
 app.get('/api/getPlayersRanking', (req, res) => {
     var Players = firebase.database().ref('/players');
@@ -275,18 +275,20 @@ app.get('/api/getPlayersRanking', (req, res) => {
             delete players[pseudo].mail;
             return players[pseudo];
         })
+        arrayPlayers = arrayPlayers.filter((player) => {
 
-
+            return player.status >= 1 && player.status !== 9;
+        })
         arrayPlayers = arrayPlayers.sort(function (a, b) {
             var textA = a.name.toUpperCase();
             var textB = b.name.toUpperCase();
             return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
         });
         arrayPlayers = arrayPlayers.sort(function (a, b) {
-            const tatolA = a.score.total || 0;
-            const tatolB = b.score.total || 0;
+            const totalA = a.score.total || 0;
+            const totalB = b.score.total || 0;
 
-            return tatolB - tatolA;
+            return totalB - totalA;
         })
         res.json(arrayPlayers);
     }, function (error) {
