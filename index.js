@@ -204,9 +204,8 @@ function calculScoreUser(user = "Hystérias") {
     })
 
 }
-calculBetsUsers(true);
 
-cron.schedule('0,30 */1 * * 3-6', () => {
+cron.schedule('0,15,30,45 */1 * * 3-7', () => {
     let date = new Date();
     console.log('CRON BETS');
     console.log({
@@ -232,7 +231,7 @@ cron.schedule('0,30 */1 * * 3-6', () => {
     });
 });
 
-cron.schedule('0,30 */1 * * 3-6', () => {
+cron.schedule('0,15,30,45 */1 * * 3-7', () => {
     let date = new Date();
     console.log('CRON SCORE');
     console.log({
@@ -256,39 +255,13 @@ cron.schedule('0,30 */1 * * 3-6', () => {
 });
 
 
-// Update DATA
-// var playersRef = firebase.database().ref("players/");
-// playersRef.update ({
-//     Hystérias: {
-//         name: "Hystérias",
-//         score: 0,
-//         mail: "cerynna@gmail.com",
-//         mdp: passwordHash.generate('0478876681'),
-//         status: 9,
-//         lastLogin: 0,
-//         bets:{}
-//     }
-// });
-
-
-// Read DATA
-// var Players = firebase.database().ref('/players');
-
-// Players.on("value", function(snapshot) {
-//     console.log(snapshot.val());
-// }, function (error) {
-//     console.log("Error: " + error.code);
-// });
-
-
 const app = express();
 
-// Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '/build')));
-app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
-})); // support encoded bodies
+})); 
 
 app.get('/api/getPlayersRanking', (req, res) => {
     var Players = firebase.database().ref('/players');
@@ -678,15 +651,7 @@ io.on('connection', function (socket) {
                 date: Date.now(),
                 message: message
             });
-
-
-
-
-
-
         }
-
-
     });
 
     socket.on('disconnect', function (event) {
