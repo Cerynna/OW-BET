@@ -4,10 +4,31 @@ const bodyParser = require('body-parser');
 const firebase = require('firebase');
 const passwordHash = require('password-hash');
 const axios = require('axios');
-
 const io = require('socket.io')();
+const cron = require('node-cron');
+const fs = require('fs');
 
-let cron = require('node-cron');
+const Stages = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
+
+
+function findInJSON(matchId) {
+    const test = Stages.map((stage) => {
+        // console.log(stage.name);
+        const lol = stage.matches.find((match) => {
+            return match == matchId
+        }) || null;
+        // console.log(lol);
+
+        return (lol !== null) ? {
+            name: stage.name,
+            id: stage.id
+        } : null;
+
+    })
+    return test.find((la) => {
+        return la != null
+    })
+}
 
 
 var config = {
@@ -27,6 +48,7 @@ function calculBetsUsers(force = false) {
             response.data.data.stages.map((stage) => {
                 stage.weeks.map((week) => {
                     week.matches.map((match) => {
+                        // console.log(match.id)
                         if (match.startDateTS < Date.now()) {
                             if (match.scores[0].value != 0 || match.scores[1].value != 0) {
                                 if (match.endDateTS < Date.now() && match.showEndTime == true) {
@@ -120,7 +142,8 @@ function calculBetsUsers(force = false) {
                                                         TeamA: match.competitors[0].abbreviatedName,
                                                         TeamB: match.competitors[1].abbreviatedName,
                                                         dateMatch: match.startDateTS,
-                                                        type: type
+                                                        type: type,
+                                                        stage: findInJSON(match.id)
 
                                                     });
                                                     currentUser[pseudo].score += currentScore;
@@ -167,26 +190,63 @@ function calculScoreUser(user = "Hystérias") {
                 total: 0,
                 win: 0,
                 lose: 0,
-                totalBets: 0
+                totalBets: 0,
+                stages: {
+                    0: {
+                        total: 0,
+                        win: 0,
+                        lose: 0,
+                        totalBets: 0,
+                    },
+                    1: {
+                        total: 0,
+                        win: 0,
+                        lose: 0,
+                        totalBets: 0,
+                    },
+                    2: {
+                        total: 0,
+                        win: 0,
+                        lose: 0,
+                        totalBets: 0,
+                    },
+                    3: {
+                        total: 0,
+                        win: 0,
+                        lose: 0,
+                        totalBets: 0,
+                    }
+
+
+                }
             }
 
             keysBets.map((key) => {
                 if (bets[key].valid) {
                     axios.get(`https://api.overwatchleague.com/matches/${key}`)
                         .then((res) => {
-                            // console.log(bets[key]);
+                            // console.log(bets[key].stage.id);
                             bets[key].date = res.data.endDate;
-                            currentScore.total += bets[key].score;
 
                             const winTeam = (bets[key].resultA > bets[key].resultB) ? "A" : "B";
                             const winBet = (bets[key].scoreA > bets[key].scoreB) ? "A" : "B";
 
+                            currentScore.stages[bets[key].stage.id].total += bets[key].score
+                            currentScore.total += bets[key].score;
+
                             if (winTeam == winBet) {
                                 currentScore.win += 1;
+                                currentScore.stages[bets[key].stage.id].win += 1
                             } else {
                                 currentScore.lose += 1;
+                                currentScore.stages[bets[key].stage.id].lose += 1
                             }
                             currentScore.totalBets += 1;
+                            currentScore.stages[bets[key].stage.id].totalBets += 1
+
+
+
+
                             userDB.bets = bets;
                             userDB.score = currentScore;
                             Players.update(userDB);
@@ -217,7 +277,7 @@ function allCalcule() {
     })
     calculBetsUsers();
     let updateDB = firebase.database().ref(`update/${Date.now()}`);
-
+    let date = new Date();
     updateDB.update({
         ts: date.getTime(),
         day: date.getDate(),
@@ -230,17 +290,7 @@ function allCalcule() {
 }
 
 cron.schedule('*/15 * * * *', () => {
-    let date = new Date();
     console.log('CRON BETS');
-    console.log({
-        ts: date.getTime(),
-        day: date.getDate(),
-        month: date.getMonth() + 1,
-        year: date.getFullYear(),
-        hours: date.getHours(),
-        min: date.getMinutes(),
-
-    });
     allCalcule();
 });
 
@@ -258,6 +308,7 @@ app.get('/api/getPlayersRanking', (req, res) => {
 
     Players.once("value", function (snapshot) {
         const players = snapshot.val();
+        
         keysPlayers = Object.keys(players);
 
         let arrayPlayers = keysPlayers.map((pseudo) => {
@@ -266,7 +317,6 @@ app.get('/api/getPlayersRanking', (req, res) => {
             return players[pseudo];
         })
         arrayPlayers = arrayPlayers.filter((player) => {
-
             return player.status >= 1 && player.status !== 9;
         })
         arrayPlayers = arrayPlayers.sort(function (a, b) {
@@ -275,11 +325,13 @@ app.get('/api/getPlayersRanking', (req, res) => {
             return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
         });
         arrayPlayers = arrayPlayers.sort(function (a, b) {
-            const totalA = a.score.total || 0;
-            const totalB = b.score.total || 0;
-
+            // const totalA = a.score.total || 0;
+            // const totalB = b.score.total || 0;
+            const totalA = (a.score.stages)? a.score.stages[1].total : 0 || 0;
+            const totalB = (b.score.stages)? b.score.stages[1].total : 0 || 0;
             return totalB - totalA;
         })
+
         res.json(arrayPlayers);
     }, function (error) {
         console.log("Error: " + error.code);
