@@ -205,18 +205,16 @@ function calculScoreUser(user = "Hystérias") {
 
 }
 
-cron.schedule('0,15,30,45 */1 * * 3-7', () => {
-    let date = new Date();
-    console.log('CRON BETS');
-    console.log({
-        ts: date.getTime(),
-        day: date.getDate(),
-        month: date.getMonth() + 1,
-        year: date.getFullYear(),
-        hours: date.getHours(),
-        min: date.getMinutes(),
+function allCalcule() {
+    const PlayerDB = firebase.database().ref(`/players`);
 
-    });
+    PlayerDB.once("value", function (snapshot) {
+        let keysUser = Object.keys(snapshot.val());
+        // console.log(keysUser);
+        keysUser.map((user) => {
+            calculScoreUser(user);
+        })
+    })
     calculBetsUsers();
     let updateDB = firebase.database().ref(`update/${Date.now()}`);
 
@@ -229,11 +227,11 @@ cron.schedule('0,15,30,45 */1 * * 3-7', () => {
         min: date.getMinutes(),
 
     });
-});
+}
 
-cron.schedule('0,15,30,45 */1 * * 3-7', () => {
+cron.schedule('*/15 * * * *', () => {
     let date = new Date();
-    console.log('CRON SCORE');
+    console.log('CRON BETS');
     console.log({
         ts: date.getTime(),
         day: date.getDate(),
@@ -243,15 +241,7 @@ cron.schedule('0,15,30,45 */1 * * 3-7', () => {
         min: date.getMinutes(),
 
     });
-    const PlayerDB = firebase.database().ref(`/players`);
-
-    PlayerDB.once("value", function (snapshot) {
-        let keysUser = Object.keys(snapshot.val());
-        // console.log(keysUser);
-        keysUser.map((user) => {
-            calculScoreUser(user);
-        })
-    })
+    allCalcule();
 });
 
 
