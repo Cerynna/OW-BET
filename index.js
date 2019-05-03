@@ -60,6 +60,7 @@ function calculBetsUsers(force = false) {
                                             currentUser[pseudo] = {
                                                 score: (currentUser[pseudo]) ? currentUser[pseudo].score : playersDB[pseudo].score
                                             }
+                                            console.log(playersDB[pseudo].loveTeam);
 
                                             if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id]) {
 
@@ -125,6 +126,13 @@ function calculBetsUsers(force = false) {
 
 
                                                     }
+                                                    // console.log(match.competitors[0].abbreviatedName);
+                                                    // console.log(match.competitors[1].abbreviatedName);
+                                                    // console.log(playersDB[pseudo].loveTeam);
+
+
+
+
                                                     if (match.competitors[0].abbreviatedName == playersDB[pseudo].loveTeam || match.competitors[1].abbreviatedName == playersDB[pseudo].loveTeam) {
                                                         // MEME SI 0 POINT +10 BUFF ALLSTAR
                                                         // if (currentScore == 0) {
@@ -265,7 +273,9 @@ function calculScoreUser(user = "Hystérias") {
 
 }
 
-function allCalcule() {
+
+function allCalcule(force = false) {
+    console.log('allCalcule');
     const PlayerDB = firebase.database().ref(`/players`);
 
     PlayerDB.once("value", function (snapshot) {
@@ -275,7 +285,12 @@ function allCalcule() {
             calculScoreUser(user);
         })
     })
-    calculBetsUsers();
+    if(force){
+        calculBetsUsers(force);
+    }else{
+
+        calculBetsUsers();
+    }
     let updateDB = firebase.database().ref(`update/${Date.now()}`);
     let date = new Date();
     updateDB.update({
@@ -289,11 +304,12 @@ function allCalcule() {
     });
 }
 
-cron.schedule('*/15 * * * *', () => {
-    console.log('CRON BETS');
-    allCalcule();
-});
+// cron.schedule('*/15 * * * *', () => {
+//     console.log('CRON BETS');
+//     allCalcule();
+// });
 
+// allCalcule();
 
 const app = express();
 
@@ -308,7 +324,7 @@ app.get('/api/getPlayersRanking', (req, res) => {
 
     Players.once("value", function (snapshot) {
         const players = snapshot.val();
-        
+
         keysPlayers = Object.keys(players);
 
         let arrayPlayers = keysPlayers.map((pseudo) => {
@@ -327,8 +343,8 @@ app.get('/api/getPlayersRanking', (req, res) => {
         arrayPlayers = arrayPlayers.sort(function (a, b) {
             // const totalA = a.score.total || 0;
             // const totalB = b.score.total || 0;
-            const totalA = (a.score.stages)? a.score.stages[1].total : 0 || 0;
-            const totalB = (b.score.stages)? b.score.stages[1].total : 0 || 0;
+            const totalA = (a.score.stages) ? a.score.stages[1].total : 0 || 0;
+            const totalB = (b.score.stages) ? b.score.stages[1].total : 0 || 0;
             return totalB - totalA;
         })
 
