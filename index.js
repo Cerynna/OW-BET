@@ -304,10 +304,10 @@ function allCalcule(force = false) {
     });
 }
 
-// cron.schedule('*/15 * * * *', () => {
-//     console.log('CRON BETS');
-//     allCalcule();
-// });
+cron.schedule('*/45 * * * *', () => {
+    console.log('CRON BETS');
+    allCalcule();
+});
 
 // allCalcule();
 
