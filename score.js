@@ -1,5 +1,11 @@
 const firebase = require('firebase');
 const axios = require('axios');
+const sleep = require('sleep');
+
+const fs = require('fs');
+
+
+const Stages = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
 
 var config = {
     apiKey: "AIzaSyDU0TwfdXnT_b4a0MYzBTaEA2dLj3IntEU",
@@ -13,53 +19,70 @@ firebase.initializeApp(config);
 
 const PlayerDB = firebase.database().ref(`/players`);
 
-const matchMemory = [];
+
+const test = Stages.find((stage) => {
+
+    return Date.now() / 1000 < stage.start;
 
 
-PlayerDB.once("value", function (snapshot) {
+
+});
+
+
+PlayerDB.once("value").then((snapshot) => {
     let keysUser = Object.keys(snapshot.val());
+    const players = snapshot.val();
 
-    var adaRef = PlayerDB.child('bets').key;
-    console.log(adaRef)
-
-    const players = snapshot.val()
-    // console.log(keysUser);
-    keysUser.forEach((user) => {
-        console.log(user);
-        if (players[user].bets) {
-            const keyMatchs = Object.keys(players[user].bets);
-            let count = 0;
-            let test = keyMatchs.map(async(idMatch) => {
-                if (matchMemory.indexOf(idMatch) < 0) {
-                    // console.log(idMatch);
-                    matchMemory.push(idMatch);
-
-                    count += 1;
-                    let res = await axios.get(`https://api.overwatchleague.com/matches/${idMatch}`);
-                    let { data } = await res.data;
-                    // console.log(data);
-                    return data;
-
-
-
-
-                }
-            });
-            // console.log(test);
+    keysUser.forEach((login) => {
+        // console.log(players[login].bets);
+        if (players[login].bets) {
+            let keysBets = Object.keys(players[login].bets);
+            keysBets.map((idMatch) => {
+                idMatch = parseInt(idMatch);
+                // console.log(test.matches);
+                const lol = test.matches.find((idMatchStage) => {
+                    // console.log(idMatchStage, idMatch);
+                    return idMatchStage == idMatch;
+                })
+                console.log('lol',lol);
+            })
         }
-
-
     })
-}).then(()=>{
-    console.log(matchMemory.length);
-    matchMemory.forEach((idMatch)=>{
+
+    // console.log(keysUser);
+
+    // console.log(keysUser);
+    // keysUser.forEach((user) => {
+    //     console.log(user);
+    //     if (players[user].bets) {
+    //         const keyMatchs = Object.keys(players[user].bets);
+    //         let count = 0;
+    //         let test = keyMatchs.map(async(idMatch) => {
+    //             // if (matchMemory.indexOf(idMatch) < 0) {
+    //             //     // console.log(idMatch);
+    //             //     matchMemory.push(idMatch);
+
+    //             //     count += 1;
+    //             //     let res = await axios.get(`https://api.overwatchleague.com/matches/${idMatch}`);
+    //             //     let { data } = await res.data;
+    //             //     // console.log(data);
+    //             //     return data;
 
 
 
-    });
+
+    //             // }
+    //         });
+    //         // console.log(test);
+    //     }
 
 
-})
+    // })
+
+
+});
+
+
 
 
 
