@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const firebase = require('firebase');
 const passwordHash = require('password-hash');
 const axios = require('axios');
-const io = require('socket.io')();
 const cron = require('node-cron');
 const fs = require('fs');
 
@@ -13,11 +12,9 @@ const Stages = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
 
 function findInJSON(matchId) {
     const test = Stages.map((stage) => {
-        // console.log(stage.name);
         const lol = stage.matches.find((match) => {
             return match == matchId
         }) || null;
-        // console.log(lol);
 
         return (lol !== null) ? {
             name: stage.name,
@@ -41,273 +38,12 @@ var config = {
 };
 firebase.initializeApp(config);
 
-function calculBetsUsers(force = false) {
-    axios.get('https://api.overwatchleague.com/schedule')
-        .then(function (response) {
-            let currentUser = [];
-            response.data.data.stages.map((stage) => {
-                stage.weeks.map((week) => {
-                    week.matches.map((match) => {
-                        // console.log(match.id)
-                        if (match.startDateTS < Date.now()) {
-                            if (match.scores[0].value != 0 || match.scores[1].value != 0) {
-                                if (match.endDateTS < Date.now() && match.showEndTime == true) {
-                                    const Players = firebase.database().ref('/players');
-                                    Players.once("value", function (snapshot) {
-                                        const playersDB = snapshot.val();
-                                        let keysPlayers = Object.keys(playersDB);
-                                        keysPlayers.map((pseudo) => {
-                                            currentUser[pseudo] = {
-                                                score: (currentUser[pseudo]) ? currentUser[pseudo].score : playersDB[pseudo].score
-                                            }
-                                            console.log(playersDB[pseudo].loveTeam);
-
-                                            if (playersDB[pseudo].bets && playersDB[pseudo].bets[match.id]) {
-
-                                                if (force !== false || playersDB[pseudo].bets[match.id].valid !== true) {
 
 
-                                                    if (playersDB[pseudo].bets[match.id].resultA != match.scores[0].value || playersDB[pseudo].bets[match.id].resultB != match.scores[1].value) {
-                                                        let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
-
-                                                        betsPlayer.update({
-                                                            valid: false,
-                                                            score: 0,
-                                                            resultA: match.scores[0].value,
-                                                            resultB: match.scores[1].value,
-                                                            TeamA: match.competitors[0].abbreviatedName,
-                                                            TeamB: match.competitors[1].abbreviatedName
-                                                        });
-                                                    }
-                                                    const winTeam = (match.scores[0].value > match.scores[1].value) ? "A" : "B";
-                                                    const winBet = (playersDB[pseudo].bets[match.id].scoreA > playersDB[pseudo].bets[match.id].scoreB) ? "A" : "B";
-                                                    let currentScore = 0;
-                                                    let type = 'lose';
-                                                    if (winTeam == winBet) {
-                                                        currentScore += 10;
-                                                        type = 'win'
-                                                    }
-                                                    if (match.scores[0].value == playersDB[pseudo].bets[match.id].scoreA && match.scores[1].value == playersDB[pseudo].bets[match.id].scoreB) {
-                                                        currentScore += 10;
-                                                        type = 'full'
-                                                    }
-
-
-                                                    if (playersDB[pseudo].bets[match.id].power) {
-                                                        console.log(`POWER USED | BY ${pseudo} | ${match.id} | ${match.competitors[0].abbreviatedName} | ${match.competitors[1].abbreviatedName} | score : ${currentScore}`);
-                                                        const power = playersDB[pseudo].bets[match.id].power;
-
-                                                        switch (power.type) {
-                                                            case 1:
-                                                                console.log(power.name);
-                                                                type += `Power(${power.name})`
-                                                                currentScore = 20;
-                                                                break;
-                                                            case 2:
-                                                                console.log(power.name);
-                                                                type += `Power(${power.name})`
-                                                                currentScore *= 2;
-                                                                break;
-                                                            case 3:
-                                                                console.log(power.name);
-                                                                break;
-                                                            case 4:
-                                                                console.log(power.name);
-                                                                break;
-                                                            case 5:
-                                                                console.log(power.name);
-                                                                break;
-
-                                                            default:
-                                                                console.log('Error Power')
-                                                                break;
-                                                        }
-
-
-
-                                                    }
-                                                    // console.log(match.competitors[0].abbreviatedName);
-                                                    // console.log(match.competitors[1].abbreviatedName);
-                                                    // console.log(playersDB[pseudo].loveTeam);
-
-
-
-
-                                                    if (match.competitors[0].abbreviatedName == playersDB[pseudo].loveTeam || match.competitors[1].abbreviatedName == playersDB[pseudo].loveTeam) {
-                                                        // MEME SI 0 POINT +10 BUFF ALLSTAR
-                                                        // if (currentScore == 0) {
-                                                        //     currentScore += 10;
-                                                        // }
-                                                        type += 'Team'
-                                                        currentScore *= 2;
-                                                    }
-                                                    let betsPlayer = firebase.database().ref(`players/${pseudo}/bets/${match.id}`);
-                                                    betsPlayer.update({
-                                                        valid: true,
-                                                        score: currentScore,
-                                                        resultA: match.scores[0].value,
-                                                        resultB: match.scores[1].value,
-                                                        TeamA: match.competitors[0].abbreviatedName,
-                                                        TeamB: match.competitors[1].abbreviatedName,
-                                                        dateMatch: match.startDateTS,
-                                                        type: type,
-                                                        stage: findInJSON(match.id)
-
-                                                    });
-                                                    currentUser[pseudo].score += currentScore;
-
-
-
-                                                }
-                                            }
-
-                                        })
-                                    }, function (error) {
-                                        console.log("Error: " + error.code);
-                                    });
-                                }
-                            }
-
-                        }
-
-                    })
-
-
-                });
-            })
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-
-
-
-}
-
-
-function calculScoreUser(user = "Hystérias") {
-
-    const Players = firebase.database().ref(`/players/${user}`);
-    Players.once("value", function (snapshot) {
-
-        const userDB = snapshot.val();
-        const bets = userDB.bets;
-        if (bets) {
-            let keysBets = Object.keys(bets);
-            let currentScore = {
-                total: 0,
-                win: 0,
-                lose: 0,
-                totalBets: 0,
-                stages: {
-                    0: {
-                        total: 0,
-                        win: 0,
-                        lose: 0,
-                        totalBets: 0,
-                    },
-                    1: {
-                        total: 0,
-                        win: 0,
-                        lose: 0,
-                        totalBets: 0,
-                    },
-                    2: {
-                        total: 0,
-                        win: 0,
-                        lose: 0,
-                        totalBets: 0,
-                    },
-                    3: {
-                        total: 0,
-                        win: 0,
-                        lose: 0,
-                        totalBets: 0,
-                    }
-
-
-                }
-            }
-
-            keysBets.map((key) => {
-                if (bets[key].valid) {
-                    axios.get(`https://api.overwatchleague.com/matches/${key}`)
-                        .then((res) => {
-                            // console.log(bets[key].stage.id);
-                            bets[key].date = res.data.endDate;
-
-                            const winTeam = (bets[key].resultA > bets[key].resultB) ? "A" : "B";
-                            const winBet = (bets[key].scoreA > bets[key].scoreB) ? "A" : "B";
-
-                            currentScore.stages[bets[key].stage.id].total += bets[key].score
-                            currentScore.total += bets[key].score;
-
-                            if (winTeam == winBet) {
-                                currentScore.win += 1;
-                                currentScore.stages[bets[key].stage.id].win += 1
-                            } else {
-                                currentScore.lose += 1;
-                                currentScore.stages[bets[key].stage.id].lose += 1
-                            }
-                            currentScore.totalBets += 1;
-                            currentScore.stages[bets[key].stage.id].totalBets += 1
-
-
-
-
-                            userDB.bets = bets;
-                            userDB.score = currentScore;
-                            Players.update(userDB);
-
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        })
-
-                }
-            })
-        }
-
-
-    })
-
-}
-
-
-function allCalcule(force = false) {
-    console.log('allCalcule');
-    const PlayerDB = firebase.database().ref(`/players`);
-
-    PlayerDB.once("value", function (snapshot) {
-        let keysUser = Object.keys(snapshot.val());
-        // console.log(keysUser);
-        keysUser.map((user) => {
-            calculScoreUser(user);
-        })
-    })
-    if(force){
-        calculBetsUsers(force);
-    }else{
-
-        calculBetsUsers();
-    }
-    let updateDB = firebase.database().ref(`update/${Date.now()}`);
-    let date = new Date();
-    updateDB.update({
-        ts: date.getTime(),
-        day: date.getDate(),
-        month: date.getMonth() + 1,
-        year: date.getFullYear(),
-        hours: date.getHours(),
-        min: date.getMinutes(),
-
-    });
-}
-
-cron.schedule('*/45 * * * *', () => {
-    console.log('CRON BETS');
-    allCalcule();
-});
+// cron.schedule('*/45 * * * *', () => {
+//     console.log('CRON BETS');
+//     allCalcule();
+// });
 
 // allCalcule();
 
@@ -353,6 +89,11 @@ app.get('/api/getPlayersRanking', (req, res) => {
         console.log("Error: " + error.code);
     });
 
+
+});
+app.get('/api/Stages', (req, res) => {
+    const Stages = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
+    res.json(Stages);
 
 });
 
@@ -646,17 +387,18 @@ app.post('/api/sendBet', (req, res) => {
     const idMatch = parseInt(req.body.idMatch);
     const user = req.body.user;
     console.log(req.body.idMatch, user.login);
+    const playerBets = firebase.database().ref(`players/${user.login}/bets`);
+    const playersRef = firebase.database().ref(`players/${user.login}/bets/${idMatch}`);
 
     axios.get(`https://api.overwatchleague.com/matches/${idMatch}`).then((response) => {
         if (response.data.startDate > Date.now() || user.status === 9) {
             if (!isNaN(scoreA) && !isNaN(scoreB)) {
-                var playersRef = firebase.database().ref(`players/${user.login}/bets/${idMatch}`);
                 playersRef.update({
                     scoreA: scoreA,
                     scoreB: scoreB
                 });
             }
-            var playerBets = firebase.database().ref(`players/${user.login}/bets`);
+
             playerBets.once("value", function (snapshot) {
                 res.json(snapshot.val())
             }, function (error) {
@@ -664,7 +406,12 @@ app.post('/api/sendBet', (req, res) => {
             });
         }
     }).catch((error) => {
-        console.log(error)
+        // console.log(error);
+        playersRef.update({
+            scoreA: parseInt(scoreA, 10) || 0,
+            scoreB: parseInt(scoreB, 10) || 0,
+            error: 'NOT FOUND',
+        });
     })
 })
 
@@ -674,58 +421,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(index));
 });
 
-const userList = [];
 
-io.on('connection', function (socket) {
-    let currentUser;
-    socket.on('sendLogin', (user) => {
-        const verifUserList = userList.find((current) => {
-            return current.login == user.login;
-        }) || null;
-        if (verifUserList == null) {
-            userList.push(user);
-            currentUser = user;
-        }
-        io.emit('newUser', userList);
-        chatMessage = firebase.database().ref('/chat/');
-        chatMessage.on("value", function (snapshot) {
-            io.emit('newMessages', snapshot.val())
-        }, function (error) {
-            console.log("Error: " + error.code);
-        });
-    });
-
-    // socket.on('login', (user) => {
-    //     if (userIO == null) {
-    //         userIO = user;
-    //     }
-
-    // })
-
-    socket.on('sendMessage', (message, user) => {
-        if (message != null && message != "") {
-            console.log('NEW MESSAGE CHAT');
-            var updateChat = firebase.database().ref(`/chat/${Date.now()}`);
-            updateChat.update({
-                user: user,
-                date: Date.now(),
-                message: message
-            });
-        }
-    });
-
-    socket.on('disconnect', function (event) {
-        let newListUsers = null;
-        if (currentUser != null) {
-            newListUsers = userList.map((user) => {
-                return user.name !== currentUser.name;
-            })
-        }
-
-    });
-});
 const port = process.env.PORT || 5000;
-io.listen(port + 1);
 app.listen(port);
 
 console.log('App is listening on port ' + port);
