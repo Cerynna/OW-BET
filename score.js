@@ -1,6 +1,5 @@
 const firebase = require('firebase');
 const axios = require('axios');
-const sleep = require('sleep');
 const cron = require('node-cron');
 const fs = require('fs');
 
