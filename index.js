@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 const firebase = require('firebase');
 const passwordHash = require('password-hash');
 const axios = require('axios');
-const cron = require('node-cron');
+
 const fs = require('fs');
 
 const Stages = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
+const Powers = JSON.parse(fs.readFileSync('Powers.json', 'utf8'));
 
 
 function findInJSON(matchId) {
@@ -79,8 +80,8 @@ app.get('/api/getPlayersRanking', (req, res) => {
         arrayPlayers = arrayPlayers.sort(function (a, b) {
             // const totalA = a.score.total || 0;
             // const totalB = b.score.total || 0;
-            const totalA = (a.score.stages) ? a.score.stages[1].total : 0 || 0;
-            const totalB = (b.score.stages) ? b.score.stages[1].total : 0 || 0;
+            const totalA = (a.score.stages) ? a.score.stages[2].total : 0 || 0;
+            const totalB = (b.score.stages) ? b.score.stages[2].total : 0 || 0;
             return totalB - totalA;
         })
 
@@ -317,6 +318,74 @@ app.get('/api/getPlayer/:idPlayer', (req, res) => {
     }, function (error) {
         console.log("Error: " + error.code);
     });
+
+})
+
+app.get('/api/getPlayerBet/:idPlayer/:idMatch', (req, res) => {
+    var Player = firebase.database().ref(`/players/${req.params.idPlayer}/bets/${req.params.idMatch}`);
+    Player.once("value", function (snapshot) {
+        const user = snapshot.val();
+        if (user != null) {
+            res.json(user)
+        } else {
+            res.json({
+                login: req.params.idPlayer,
+                error: "Problème avec la Base de donnée le site est en Béta :D"
+            })
+        }
+
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+
+});
+app.get('/api/power/remove/:idPlayer/:idMatch', (req, res) => {
+    var Player = firebase.database().ref(`/players/${req.params.idPlayer}/bets/${req.params.idMatch}`);
+    var PowerPlayer = firebase.database().ref(`/players/${req.params.idPlayer}/power`);
+    Player.once("value", function (snapshot) {
+        const bet = snapshot.val();
+        if (bet != null) {
+            let dateUse = snapshot.child('power').child('date').child('use').val()
+
+            PowerPlayer.once('value', (snapshot) => {
+                snapshot.forEach((data) => {
+                    let dateUsePower = data.child("date").child('use').val()
+                    if (dateUsePower === dateUse) {
+                        console.log(dateUse)
+
+                        console.log()
+                    }
+                })
+                // console.log(snapshot.val());
+            })
+
+            delete bet.power;
+            Player.set(bet);
+            console.log(bet);
+            res.json(true);
+        } else {
+            // res.json({
+            //     login: req.params.idPlayer,
+            //     error: "Problème avec la Base de donnée le site est en Béta :D"
+            // })
+        }
+
+    }, function (error) {
+        console.log("Error: " + error.code);
+    });
+
+
+
+
+
+
+    // res.json(true);
+
+})
+
+app.get('/api/power', (req, res) => {
+    const Powers = JSON.parse(fs.readFileSync('Powers.json', 'utf8'));
+    res.json(Powers);
 
 })
 

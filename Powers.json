@@ -1,0 +1,37 @@
+[{
+    "name": "Fix Score",
+    "longText": "Le score que tu pari sera le score qu'il y aura",
+    "type": 1,
+    "img": "1.png",
+    "valid": true
+}, {
+    "name": "x2",
+    "longText": "Le score que tu ferra sera multiplier par deux",
+    "type": 2,
+    "img": "2.png",
+    "valid": true
+}, {
+    "name": "Clutch",
+    "longText": "Si votre pronostic s'avère juste tu recevra 20 points en plus, si ca n'est pas le cas alors tu perdra 20 points",
+    "type": 3,
+    "img": "3.png",
+    "valid": true
+}, {
+    "name": "Wall Hack",
+    "longText": "Permettra de changer son score jusqu'a la mi-temp du match",
+    "type": 4,
+    "img": "4.png",
+    "valid": false
+}, {
+    "name": "Random Shot",
+    "longText": "Le score de ce match sera fait en random et si tu as le bon resultat tu multiplira part deux ton score",
+    "type": 5,
+    "img": "5.png",
+    "valid": false
+}, {
+    "name": "???",
+    "longText": "Si vous avez des idées",
+    "type": 6,
+    "img": "6.png",
+    "valid": false
+}]

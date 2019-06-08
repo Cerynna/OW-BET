@@ -1,7 +1,7 @@
 const firebase = require('firebase');
 const axios = require('axios');
 const sleep = require('sleep');
-
+const cron = require('node-cron');
 const fs = require('fs');
 
 
@@ -21,13 +21,36 @@ const dataBase = firebase.database();
 const PlayerDB = dataBase.ref(`/players`);
 
 let currentStage = Stages.find((stage) => {
-    return Date.now() / 1000 < stage.start
+    return Date.now() / 1000 < stage.end
 }) || Stages[0];
 
+// currentStage = Stages[1];
+// console.log(currentStage);
 
-currentStage = Stages[1];
-// console.log(currentStage)
+console.log('SCORE INIT');
 
+cron.schedule('0 0 * * 1', () => {
+    console.log('Change currentStage');
+    currentStage = Stages.find((stage) => {
+        return Date.now() / 1000 < stage.end
+    }) || Stages[0];
+});
+
+cron.schedule('*/30 * * * *', () => {
+    console.log('CALCULE BETS CRON');
+    CalculBets();
+    setTimeout(()=>{
+        console.log('CALCULE TOTAL CRON');
+        CalculeTotal();
+    }, 10000)
+});
+
+
+CalculBets();
+    setTimeout(()=>{
+        console.log('CALCULE TOTAL CRON');
+        CalculeTotal();
+    }, 10000)
 
 function CalculBets(force = false) {
     PlayerDB.once("value").then((snapshot) => {
@@ -177,7 +200,7 @@ function CalculeTotal() {
 
                     }
                 })
-            // dataBase.ref(`/players/${login}/score`).update(currentScore);
+            dataBase.ref(`/players/${login}/score`).update(currentScore);
             console.log(login, currentScore);
         })
     })
@@ -228,4 +251,4 @@ function CalculScore(data, loveTeam, power) {
 
 // CalculBets(false);
 
-CalculeTotal();
+// CalculeTotal();
