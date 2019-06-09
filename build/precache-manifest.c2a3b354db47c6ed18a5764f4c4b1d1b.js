@@ -20,6 +20,10 @@ self.__precacheManifest = [
     "url": "/static/media/big_noodle_titling.ff78c5e2.ttf"
   },
   {
+    "revision": "c7fe86ae16776eebb5ffe699ab5fb1b4",
+    "url": "/static/media/orisa.c7fe86ae.png"
+  },
+  {
     "revision": "9a99063580cd5efab31d0bede96363a7",
     "url": "/static/media/ana.9a990635.png"
   },
@@ -32,10 +36,6 @@ self.__precacheManifest = [
     "url": "/static/media/bastion.7f6cb7c3.png"
   },
   {
-    "revision": "c7fe86ae16776eebb5ffe699ab5fb1b4",
-    "url": "/static/media/orisa.c7fe86ae.png"
-  },
-  {
     "revision": "82b0e6b37a9303b97e6ed6ca2d196dcc",
     "url": "/static/media/genji.82b0e6b3.png"
   },
@@ -44,12 +44,12 @@ self.__precacheManifest = [
     "url": "/static/media/hanzo.b6129a37.png"
   },
   {
-    "revision": "897791f66823c7239bd99040ed6a27c7",
-    "url": "/static/media/junkrat.897791f6.png"
-  },
-  {
     "revision": "c5d7841db87b16723642273dfbe0cbe1",
     "url": "/static/media/lucio.c5d7841d.png"
+  },
+  {
+    "revision": "897791f66823c7239bd99040ed6a27c7",
+    "url": "/static/media/junkrat.897791f6.png"
   },
   {
     "revision": "f9144ff6dc15bf53f70a6bac70ecd3fc",

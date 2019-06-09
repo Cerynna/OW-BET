@@ -67,7 +67,9 @@ function getMatches() {
 
 
             // console.log(json);
-            fs.writeFile("matches.json", JSON.stringify(json));
+            fs.writeFile("matches.json", JSON.stringify(json), ()=>{
+                
+            });
 
 
         })

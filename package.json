@@ -2,7 +2,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js & node score.js & node parse.js",
+    "start": "concurrently \"node index.js\" \"node score.js\" \"node parse.js\"",
+    "score": "node score.js",
+    "parse": "node parse.js",
     "build": "rm -rf build && cd client && yarn build"
   },
   "dependencies": {
