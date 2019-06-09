@@ -45,7 +45,7 @@ cron.schedule('*/30 * * * *', () => {
 });
 
 
-CalculBets();
+CalculBets(true);
     setTimeout(()=>{
         console.log('CALCULE TOTAL CRON');
         CalculeTotal();
@@ -107,7 +107,7 @@ function CalculBets(force = false) {
                                     idMatchPlayer = parseInt(idMatchPlayer);
                                     return idMatchPlayer === idMatch;
                                 })) {
-                                console.log('PLAYER : ', player)
+                                console.log('PLAYER : ', player);
                                 const power = Players[player].bets[idMatch].power || false;
 
                                 const newData = CalculScore({

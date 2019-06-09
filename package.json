@@ -1,7 +1,7 @@
 {
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "concurrently \"nodemon index.js\" \"cd client && yarn start\"",
     "start": "concurrently \"node index.js\" \"node score.js\" \"node parse.js\"",
     "score": "node score.js",
     "parse": "node parse.js",
