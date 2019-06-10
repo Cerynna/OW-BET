@@ -37,7 +37,7 @@ cron.schedule('0 0 * * 1', () => {
 
 cron.schedule('*/30 * * * *', () => {
     console.log('CALCULE BETS CRON');
-    CalculBets();
+    CalculBets(true);
     setTimeout(()=>{
         console.log('CALCULE TOTAL CRON');
         CalculeTotal();

@@ -4,7 +4,7 @@ const cron = require('node-cron');
 
 console.log('PARSE INIT');
 
-cron.schedule('*/30 * * * *', () => {
+cron.schedule('*/15 * * * *', () => {
     console.log('PARSE MATCHES CRON');
     getMatches();
 });
