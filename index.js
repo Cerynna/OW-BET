@@ -399,11 +399,22 @@ app.get('/api/power/remove/:idPlayer/:idMatch', (req, res) => {
 
     // res.json(true);
 
-})
+});
 
 app.get('/api/power', (req, res) => {
     const Powers = JSON.parse(fs.readFileSync('Powers.json', 'utf8'));
     res.json(Powers);
+
+})
+
+app.get('/api/match/:idMatch', (req, res) => {
+    const idmAtch = req.params.idMatch
+    const match = JSON.parse(fs.readFileSync('matches.json', 'utf8')).map((stage)=>{
+        return stage.matches.find((match)=>{
+           return match.id === parseInt(req.params.idMatch) ;
+        })
+            }).filter(x=>x).pop();
+    res.json(match);
 
 })
 
