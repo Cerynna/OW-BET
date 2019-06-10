@@ -97,7 +97,15 @@ app.get('/api/Stages', (req, res) => {
     res.json(Stages);
 
 });
+app.get('/api/allTeams', (req, res) => {
+    fs.readdir('./build/imgs/teams', (err, files) => {
+        res.json(files);
+        // files.forEach(file => {
+        //   console.log(file);
+        // });
+      });
 
+});
 
 app.get('/api/getHome', (req, res) => {
     var Home = firebase.database().ref('/Home');
@@ -243,6 +251,16 @@ app.post('/api/login', (req, res) => {
                         link: 'fullTeam-2',
                         type: 2,
                         name: "x2",
+                    },
+                    {
+                        link: 'beta-open',
+                        type: 3,
+                        name: "Clutsh",
+                    },
+                    {
+                        link: 'beta-close',
+                        type: 3,
+                        name: "Clutsh",
                     },
                 ]
                 if (player.snap.achievement) {
